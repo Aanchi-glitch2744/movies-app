@@ -87,7 +87,7 @@ class Details extends Component {
         }
         return (
             <div className="details">
-                <Header />
+                <Header showBookShowButton="true" />
                 <div className="back">
                     <Typography onClick={this.backToHomeHandler}>
                         &#60; Back to Home
@@ -143,7 +143,7 @@ class Details extends Component {
                                 onClick={() => this.starClickHandler(star.id)}
                             />
                         ))}
-                        
+
                     <div className="bold marginBottom16 marginTop16">
                             <Typography>
                                 <span className="bold">Artists:</span>
