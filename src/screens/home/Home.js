@@ -56,14 +56,14 @@ class Home extends Component {
         super();
         this.state = {
             movieName: "",
+            upcomingMovies: [],
             genres: [],
             releasedMovies: [],
             artists: []
         }
     }
 
-    componentWillMount()
-    {
+    componentWillMount(){
         let data = null;
         let xhr = new XMLHttpRequest();
         let that = this;
@@ -75,7 +75,7 @@ class Home extends Component {
         }
     });
 
-        xhr.open("GET", this.props.baseUrl+ "movies");
+        xhr.open("GET", this.props.baseUrl+ "movies?status=PUBLISHED");
         xhr.setRequestHeader("Cache-Control", "no-cache");
         xhr.send(data);
         
@@ -121,7 +121,7 @@ class Home extends Component {
                 </div>
 
                 <GridList cols={5} className={classes.gridListUpcomingMovies} >
-                    {moviesData.map(movie => (
+                {this.state.upcomingMovies.map(movie => (
                         <GridListTile key={movie.id}>
                             <img src={movie.poster_url} className="movie-poster" alt={movie.title} />
                             <GridListTileBar title={movie.title} />
@@ -151,6 +151,7 @@ class Home extends Component {
                                         FIND MOVIES BY:
                                     </Typography>
                                 </FormControl>
+
                                 <FormControl className={classes.formControl}>
                                     <InputLabel htmlFor="movieName">Movie Name</InputLabel>
                                     <Input id="movieName" onChange={this.movieNameChangeHandler} />
@@ -160,7 +161,6 @@ class Home extends Component {
                                     <InputLabel htmlFor="select-multiple-checkbox">Genres</InputLabel>
                                     <Select
                                         multiple
-                                        input={<Input id="select-multiple-checkbox" />}
                                         input={<Input id="select-multiple-checkbox-genre" />}
                                         renderValue={selected => selected.join(',')}
                                         value={this.state.genres}
