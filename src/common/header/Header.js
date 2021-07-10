@@ -12,6 +12,7 @@ import Input from '@material-ui/core/Input';
 import PropTypes from 'prop-types';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import { Link } from 'react-router-dom';
+
 const customStyles = {
     content: {
         top: '50%',
@@ -22,6 +23,7 @@ const customStyles = {
         transform: 'translate(-50%, -50%)'
     }
 };
+
 const TabContainer = function (props) {
     return (
         <Typography component="div" style={{ padding: 0, textAlign: 'center' }}>
@@ -29,10 +31,13 @@ const TabContainer = function (props) {
         </Typography>
     )
 }
+
 TabContainer.propTypes = {
     children: PropTypes.node.isRequired
 }
+
 class Header extends Component {
+
     constructor() {
         super();
         this.state = {
@@ -52,7 +57,8 @@ class Header extends Component {
             registerPassword: "",
             contactRequired: "dispNone",
             contact: "",
-            registrationSuccess: false
+            registrationSuccess: false,
+            loggedIn: sessionStorage.getItem("access-token") == null ? false : true
         }
     }
 
@@ -76,22 +82,50 @@ class Header extends Component {
             contact: ""
         });
     }
+
     closeModalHandler = () => {
         this.setState({ modalIsOpen: false });
     }
+
     tabChangeHandler = (event, value) => {
         this.setState({ value });
     }
+
     loginClickHandler = () => {
         this.state.username === "" ? this.setState({ usernameRequired: "dispBlock" }) : this.setState({ usernameRequired: "dispNone" });
         this.state.loginPassword === "" ? this.setState({ loginPasswordRequired: "dispBlock" }) : this.setState({ loginPasswordRequired: "dispNone" });
+    
+        let dataLogin = null;
+        let xhrLogin = new XMLHttpRequest();
+        let that = this;
+        xhrLogin.addEventListener("readystatechange", function () {
+            if (this.readyState === 4) {
+                sessionStorage.setItem("uuid", JSON.parse(this.responseText).id);
+                sessionStorage.setItem("access-token", xhrLogin.getResponseHeader("access-token"));
+
+                that.setState({
+                    loggedIn: true
+                });
+
+                that.closeModalHandler();
+            }
+        });
+
+        xhrLogin.open("POST", this.props.baseUrl + "auth/login");
+        xhrLogin.setRequestHeader("Authorization", "Basic " + window.btoa(this.state.username + ":" + this.state.loginPassword));
+        xhrLogin.setRequestHeader("Content-Type", "application/json");
+        xhrLogin.setRequestHeader("Cache-Control", "no-cache");
+        xhrLogin.send(dataLogin);
     }
+
     inputUsernameChangeHandler = (e) => {
         this.setState({ username: e.target.value });
     }
+
     inputLoginPasswordChangeHandler = (e) => {
         this.setState({ loginPassword: e.target.value });
     }
+
     registerClickHandler = () => {
         this.state.firstname === "" ? this.setState({ firstnameRequired: "dispBlock" }) : this.setState({ firstnameRequired: "dispNone" });
         this.state.lastname === "" ? this.setState({ lastnameRequired: "dispBlock" }) : this.setState({ lastnameRequired: "dispNone" });
@@ -126,18 +160,23 @@ class Header extends Component {
     inputFirstNameChangeHandler = (e) => {
         this.setState({ firstname: e.target.value });
     }
+
     inputLastNameChangeHandler = (e) => {
         this.setState({ lastname: e.target.value });
     }
+
     inputEmailChangeHandler = (e) => {
         this.setState({ email: e.target.value });
     }
+
     inputRegisterPasswordChangeHandler = (e) => {
         this.setState({ registerPassword: e.target.value });
     }
+
     inputContactChangeHandler = (e) => {
         this.setState({ contact: e.target.value });
     }
+
     render() {
         return (
             <div>
@@ -169,6 +208,7 @@ class Header extends Component {
                         <Tab label="Login" />
                         <Tab label="Register" />
                     </Tabs>
+                    
                     {this.state.value === 0 &&
                         <TabContainer>
                             <FormControl required>
@@ -187,9 +227,18 @@ class Header extends Component {
                                 </FormHelperText>
                             </FormControl>
                             <br /><br />
+                            {this.state.loggedIn === true &&
+                                <FormControl>
+                                    <span className="successText">
+                                        Login Successful!
+                                    </span>
+                                </FormControl>
+                            }
+                            <br /><br />
                             <Button variant="contained" color="primary" onClick={this.loginClickHandler}>LOGIN</Button>
                         </TabContainer>
                     }
+                    
                     {this.state.value === 1 &&
                         <TabContainer>
                             <FormControl required>
